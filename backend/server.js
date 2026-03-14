@@ -10,7 +10,7 @@ const authRoutes = require("./routes/auth");
 const taskRoutes = require("./routes/tasks");
 
 const app = express();
-
+app.set("trust proxy", 1);
 app.use(helmet());
 
 const limiter = rateLimit({
