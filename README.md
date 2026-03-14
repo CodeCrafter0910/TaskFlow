@@ -1,19 +1,16 @@
-# TaskFlow — Task Management Application
+# TaskFlow
 
-A full-stack task management app built with Node.js, Next.js, and MongoDB. Users can register, log in, and manage their own tasks with full CRUD support, search, filtering, and pagination.
+A task management app I built as part of a full-stack assessment. It covers user auth, task CRUD, search and filtering, AES payload encryption, and is deployed on Render + Vercel.
 
 ---
 
-## Tech Stack
+## Stack
 
-| Layer      | Technology                        |
-|------------|-----------------------------------|
-| Backend    | Node.js + Express                 |
-| Frontend   | Next.js 14 (App Router)           |
-| Database   | MongoDB (Mongoose ODM)            |
-| Auth       | JWT stored in HTTP-only cookies   |
-| Encryption | AES via crypto-js                 |
-| Deployment | Render (backend) + Vercel (frontend) |
+- **Backend** — Node.js + Express
+- **Frontend** — Next.js 14 (App Router)
+- **Database** — MongoDB with Mongoose
+- **Auth** — JWT in HTTP-only cookies
+- **Deployment** — Render (API) + Vercel (frontend)
 
 ---
 
@@ -22,39 +19,31 @@ A full-stack task management app built with Node.js, Next.js, and MongoDB. Users
 ```
 taskflow/
 ├── backend/
-│   ├── controllers/     # Route handler logic
-│   ├── middleware/       # Auth guard, request validation
-│   ├── models/           # Mongoose schemas
-│   ├── routes/           # Express routers
-│   ├── utils/            # JWT helpers, AES encryption
-│   └── server.js         # App entry point
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── utils/
+│   └── server.js
 └── frontend/
     ├── app/
-    │   ├── auth/         # Login and register pages
-    │   ├── dashboard/    # Task list with search/filter/pagination
-    │   └── tasks/        # Create and edit task pages
-    ├── hooks/            # Auth context
-    ├── lib/              # API clients
-    └── types/            # Shared TypeScript types
+    │   ├── auth/
+    │   ├── dashboard/
+    │   └── tasks/
+    ├── hooks/
+    ├── lib/
+    └── types/
 ```
 
 ---
 
-## Local Setup
+## Running Locally
 
 ### Prerequisites
-
 - Node.js 18+
-- A MongoDB Atlas cluster (free tier works fine)
+- MongoDB Atlas account (free tier is fine)
 
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/your-username/taskflow.git
-cd taskflow
-```
-
-### 2. Set up the backend
+### Backend
 
 ```bash
 cd backend
@@ -62,46 +51,44 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and fill in your values:
+Fill in your `.env`:
 
 ```
 PORT=5000
 MONGODB_URI=mongodb+srv://...
-JWT_SECRET=a_long_random_string_at_least_32_chars
+JWT_SECRET=your_secret_here
 JWT_EXPIRES_IN=7d
 AES_SECRET_KEY=exactly_32_characters_long_key!!
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 ```
 
-Start the dev server:
-
 ```bash
 npm run dev
 ```
 
-### 3. Set up the frontend
+### Frontend
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
 cp .env.example .env
 ```
 
-Edit `.env`:
+Fill in your `.env`:
 
 ```
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 NEXT_PUBLIC_AES_SECRET_KEY=exactly_32_characters_long_key!!
 ```
 
-Start the dev server:
-
 ```bash
 npm run dev
 ```
 
-The app will be at `http://localhost:3000`.
+App runs at `http://localhost:3000`.
+
+> The `AES_SECRET_KEY` in both `.env` files must be the same string.
 
 ---
 
@@ -109,59 +96,52 @@ The app will be at `http://localhost:3000`.
 
 ### Backend → Render
 
-1. Push the `backend/` folder to a GitHub repo
-2. Create a new **Web Service** on [render.com](https://render.com)
-3. Set build command: `npm install`
-4. Set start command: `node server.js`
-5. Add all environment variables from `.env.example` in the Render dashboard
-6. Set `NODE_ENV=production` and `FRONTEND_URL=https://your-vercel-app.vercel.app`
+1. Create a new Web Service on [render.com](https://render.com)
+2. Connect this repo and set **Root Directory** to `backend`
+3. Build command: `npm install`
+4. Start command: `node server.js`
+5. Add the same environment variables from `.env`, but set `NODE_ENV=production` and `FRONTEND_URL` to your Vercel URL
 
 ### Frontend → Vercel
 
-1. Push the `frontend/` folder to a GitHub repo (or a subdirectory)
-2. Import the project on [vercel.com](https://vercel.com)
-3. Set environment variables:
-   - `NEXT_PUBLIC_API_URL=https://your-render-service.onrender.com/api`
+1. Import this repo on [vercel.com](https://vercel.com)
+2. Set **Root Directory** to `frontend`
+3. Add environment variables:
+   - `NEXT_PUBLIC_API_URL=https://your-render-url.onrender.com/api`
    - `NEXT_PUBLIC_AES_SECRET_KEY=your_key`
-4. Deploy
+
+Also make sure MongoDB Atlas has **Network Access → Allow from Anywhere** (`0.0.0.0/0`) enabled, otherwise Render can't reach the database.
 
 ---
 
-## API Reference
+## API
 
-All endpoints are prefixed with `/api`.
+All routes are prefixed with `/api`.
 
 ### Auth
 
-| Method | Endpoint         | Auth | Description        |
-|--------|------------------|------|--------------------|
-| POST   | /auth/register   | No   | Create account     |
-| POST   | /auth/login      | No   | Log in             |
-| POST   | /auth/logout     | Yes  | Log out            |
-| GET    | /auth/me         | Yes  | Get current user   |
+| Method | Endpoint | Protected | Description |
+|--------|----------|-----------|-------------|
+| POST | /auth/register | No | Create account |
+| POST | /auth/login | No | Log in |
+| POST | /auth/logout | Yes | Log out |
+| GET | /auth/me | Yes | Get current user |
 
 ### Tasks
 
-| Method | Endpoint     | Auth | Description            |
-|--------|--------------|------|------------------------|
-| GET    | /tasks       | Yes  | List tasks (paginated) |
-| POST   | /tasks       | Yes  | Create a task          |
-| GET    | /tasks/:id   | Yes  | Get single task        |
-| PUT    | /tasks/:id   | Yes  | Update a task          |
-| DELETE | /tasks/:id   | Yes  | Delete a task          |
+| Method | Endpoint | Protected | Description |
+|--------|----------|-----------|-------------|
+| GET | /tasks | Yes | List tasks |
+| POST | /tasks | Yes | Create task |
+| GET | /tasks/:id | Yes | Get single task |
+| PUT | /tasks/:id | Yes | Update task |
+| DELETE | /tasks/:id | Yes | Delete task |
 
-#### GET /tasks — Query Parameters
-
-| Param  | Type   | Description                          |
-|--------|--------|--------------------------------------|
-| page   | number | Page number (default: 1)             |
-| limit  | number | Results per page (default: 10, max: 50) |
-| status | string | Filter by `todo`, `in-progress`, `done` |
-| search | string | Search by title (case-insensitive)   |
+`GET /tasks` supports query params: `page`, `limit`, `status` (`todo` / `in-progress` / `done`), `search`.
 
 ---
 
-### Sample Requests & Responses
+### Examples
 
 **Register**
 ```http
@@ -178,7 +158,7 @@ Content-Type: application/json
 {
   "success": true,
   "message": "Account created successfully.",
-  "user": { "id": "664a...", "name": "Jane Doe", "email": "jane@example.com" }
+  "user": { "encrypted": "U2FsdGVkX1..." }
 }
 ```
 
@@ -209,7 +189,7 @@ Content-Type: application/json
 }
 ```
 
-**Get Tasks with Pagination**
+**Get Tasks**
 ```http
 GET /api/tasks?page=1&limit=5&status=todo&search=tests
 ```
@@ -241,13 +221,13 @@ GET /api/tasks?page=1&limit=5&status=todo&search=tests
 
 ---
 
-## Security Notes
+## Security
 
-- Passwords are hashed with bcrypt (cost factor 12)
-- JWT is stored in an HTTP-only cookie — inaccessible to JavaScript
-- `Secure` and `SameSite=Strict` flags are applied in production
-- Helmet sets secure HTTP headers on every response
-- Rate limiting is applied to all `/api/*` routes (100 req / 15 min)
-- Input is validated and sanitised with `express-validator` before hitting the database
-- Mongoose uses strict schemas which prevent arbitrary field injection
-- Environment variables are never hardcoded — all secrets live in `.env`
+- Passwords hashed with bcrypt at cost factor 12
+- JWT stored in HTTP-only cookie, never exposed to JavaScript
+- `Secure` + `SameSite=Strict` flags set in production
+- Auth response payloads encrypted with AES before being sent to the client
+- Helmet applied on every response for secure HTTP headers
+- Rate limiting on all `/api/*` routes — 100 requests per 15 minutes
+- All inputs validated and sanitised with `express-validator`
+- No secrets hardcoded anywhere
